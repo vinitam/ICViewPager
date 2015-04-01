@@ -15,7 +15,7 @@
 
 #define kTabHeight 44.0
 #define kTabOffset 56.0
-#define kTabWidth 128.0
+#define kTabWidth 95.0
 #define kTabLocation 1.0
 #define kStartFromSecondTab 0.0
 #define kCenterCurrentTab 0.0
@@ -93,8 +93,8 @@
     bezierPath = [UIBezierPath bezierPath];
     [bezierPath moveToPoint:CGPointMake(0.0, CGRectGetHeight(rect))];
     [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect))];
-    [[UIColor colorWithWhite:197.0/255.0 alpha:0.75] setStroke];
-    [bezierPath setLineWidth:1.0];
+    [[UIColor colorWithRed:236.0/255.0 green:236.0/255.0 blue:236.0/255.0 alpha:1] setStroke];
+    [bezierPath setLineWidth:8.0];
     [bezierPath stroke];
     
     // Draw an indicator line if tab is selected
@@ -105,7 +105,7 @@
         // Draw the indicator
         [bezierPath moveToPoint:CGPointMake(0.0, CGRectGetHeight(rect) - 1.0)];
         [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect) - 1.0)];
-        [bezierPath setLineWidth:5.0];
+        [bezierPath setLineWidth:8.0];
         [self.indicatorColor setStroke];
         [bezierPath stroke];
     }
@@ -210,16 +210,16 @@
         }
     }
     
-    CGRect frame = self.tabsView.frame;
+    CGRect frame = CGRectMake(self.tabsView.frame.origin.x, topLayoutGuide, self.tabsView.frame.size.width, self.tabsView.frame.size.height);
     frame.origin.x = 0.0;
-    frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide : CGRectGetHeight(self.view.frame) - [self.tabHeight floatValue];
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = [self.tabHeight floatValue];
     self.tabsView.frame = frame;
     
+    
     frame = self.contentView.frame;
     frame.origin.x = 0.0;
-    frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide + CGRectGetHeight(self.tabsView.frame) : topLayoutGuide;
+    frame.origin.y = topLayoutGuide + kTabHeight + 5;
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = CGRectGetHeight(self.view.frame) - (topLayoutGuide + CGRectGetHeight(self.tabsView.frame)) - (self.tabBarController.tabBar.hidden ? 0 : CGRectGetHeight(self.tabBarController.tabBar.frame));
     self.contentView.frame = frame;
@@ -236,7 +236,19 @@
     //if Tap is not selected Tab(new Tab)
     if (self.activeTabIndex != index) {
         // Select the tab
-        [self selectTabAtIndex:index didSwipe:NO];
+        
+        NSUInteger previousIndex = self.activeTabIndex ? self.activeTabIndex : 0;
+        TabView *prevtabView = [self.tabs objectAtIndex:previousIndex];
+        UILabel *previousLabel = (UILabel *)[prevtabView viewWithTag:10];
+        previousLabel.textColor = [UIColor blackColor];
+        
+        
+        TabView *currenttabView = [self.tabs objectAtIndex:index];
+        UILabel *currentLabel = (UILabel *)[currenttabView viewWithTag:10];
+        currentLabel.textColor = [UIColor colorWithRed:253.0/255.0 green:80.0/255.0 blue:2.0/255.0 alpha:1];
+        
+        
+        [self selectTabAtIndex:index];
     }
 }
 
@@ -363,7 +375,7 @@
     if (!viewController) {
         viewController = [[UIViewController alloc] init];
         viewController.view = [[UIView alloc] init];
-        viewController.view.backgroundColor = [UIColor clearColor];
+        viewController.view.backgroundColor = [UIColor lightGrayColor];
     }
     
     // __weak pageViewController to be used in blocks to prevent retaining strong reference to self
@@ -414,21 +426,32 @@
         index != activeContentIndex &&
         index != activeContentIndex - 1)
     {
-        [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+        if(index < self.contents.count)
+        {
+            [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+            
+        }
     }
     index = self.activeContentIndex;
     if (index != activeContentIndex - 1 &&
         index != activeContentIndex &&
         index != activeContentIndex + 1)
     {
-        [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+        if(index < self.contents.count)
+        {
+            [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+        }
     }
     index = self.activeContentIndex + 1;
     if (index < self.contents.count &&
         index != activeContentIndex &&
         index != activeContentIndex + 1)
     {
-        [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+        if(index < self.contents.count)
+        {
+            
+            [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
+        }
     }
     
     _activeContentIndex = activeContentIndex;
@@ -573,21 +596,13 @@
     // Call to setup again with the updated data
     [self defaultSetup];
 }
-
 - (void)selectTabAtIndex:(NSUInteger)index {
-    [self selectTabAtIndex:index didSwipe:NO];
-}
-
-- (void)selectTabAtIndex:(NSUInteger)index didSwipe:(BOOL)didSwipe {
     
     if (index >= self.tabCount) {
         return;
     }
     
     self.animatingToTab = YES;
-    
-    // Keep a reference to previousIndex in case it is needed for the delegate
-    NSUInteger previousIndex = self.activeTabIndex;
     
     // Set activeTabIndex
     self.activeTabIndex = index;
@@ -598,12 +613,6 @@
     // Inform delegate about the change
     if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:)]) {
         [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex];
-    }
-    else if([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:fromIndex:)]){
-        [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex fromIndex:previousIndex];
-    }
-    else if ([self.delegate respondsToSelector:@selector(viewPager:didChangeTabToIndex:fromIndex:didSwipe:)]) {
-        [self.delegate viewPager:self didChangeTabToIndex:self.activeTabIndex fromIndex:previousIndex didSwipe:didSwipe];
     }
 }
 
@@ -749,7 +758,7 @@
         case ViewPagerContent:
             return [self contentViewBackgroundColor];
         default:
-            return [UIColor clearColor];
+            return [UIColor lightGrayColor];
     }
 }
 
@@ -761,7 +770,7 @@
                                                               navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal
                                                                             options:nil];
     [self addChildViewController:self.pageViewController];
-
+    
     // Setup some forwarding events to hijack the scrollView
     // Keep a reference to the actual delegate
     self.actualDelegate = ((UIScrollView *)[self.pageViewController.view.subviews objectAtIndex:0]).delegate;
@@ -828,14 +837,14 @@
             contentSizeWidth = [self.tabOffset floatValue];
         }
     }
-    
+    contentSizeWidth = 0;
     for (NSUInteger i = 0; i < self.tabCount; i++) {
         
         UIView *tabView = [self tabViewAtIndex:i];
         
         CGRect frame = tabView.frame;
         frame.origin.x = contentSizeWidth;
-        frame.size.width = [self.tabWidth floatValue];
+        frame.size.width = self.view.frame.size.width/3;
         tabView.frame = frame;
         
         [self.tabsView addSubview:tabView];
@@ -844,19 +853,10 @@
         
         // To capture tap events
         UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+        tapGestureRecognizer.delegate = self;
         [tabView addGestureRecognizer:tapGestureRecognizer];
     }
     
-    // Extend contentSizeWidth if fixLatterTabsPositions is provided YES
-    if ([self.fixLatterTabsPositions boolValue]) {
-        
-        // And if the centerCurrentTab is provided as YES fine tune the content size according to it
-        if ([self.centerCurrentTab boolValue]) {
-            contentSizeWidth += (CGRectGetWidth(self.tabsView.frame) - [self.tabWidth floatValue]) / 2.0;
-        } else {
-            contentSizeWidth += CGRectGetWidth(self.tabsView.frame) - [self.tabWidth floatValue] - [self.tabOffset floatValue];
-        }
-    }
     
     self.tabsView.contentSize = CGSizeMake(contentSizeWidth, [self.tabHeight floatValue]);
     
@@ -874,9 +874,15 @@
         [self.view insertSubview:self.contentView atIndex:0];
     }
     
-    // Select starting tab
-    NSUInteger index = [self.startFromSecondTab boolValue] ? 1 : 0;
-    [self selectTabAtIndex:index didSwipe:NO];
+    if(self.selectedIndex < self.tabCount)
+    {
+        [self selectTabAtIndex:self.selectedIndex];
+    }
+    else
+    {
+        [self selectTabAtIndex:0];
+        
+    }
     
     // Set setup done
     self.defaultSetupDone = YES;
@@ -889,7 +895,7 @@
     }
     
     if ([[self.tabs objectAtIndex:index] isEqual:[NSNull null]]) {
-
+        
         // Get view from dataSource
         UIView *tabViewContent = [self.dataSource viewPager:self viewForTabAtIndex:index];
         tabViewContent.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
@@ -966,10 +972,23 @@
 - (void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray *)previousViewControllers transitionCompleted:(BOOL)completed {
     
     UIViewController *viewController = self.pageViewController.viewControllers[0];
+    if([previousViewControllers count] > 0)
+    {
+        UIViewController *prevviewController = previousViewControllers[0];
+        
+        NSUInteger previousIndex = [self indexForViewController:prevviewController];
+        TabView *prevtabView = [self.tabs objectAtIndex:previousIndex];
+        UILabel *previousLabel = (UILabel *)[prevtabView viewWithTag:10];
+        previousLabel.textColor = [UIColor blackColor];
+    }
     
     // Select tab
-    NSUInteger index = [self indexForViewController:viewController];
-    [self selectTabAtIndex:index didSwipe:YES];
+    NSUInteger currentIndex = [self indexForViewController:viewController];
+    TabView *currenttabView = [self.tabs objectAtIndex:currentIndex];
+    UILabel *currentLabel = (UILabel *)[currenttabView viewWithTag:10];
+    currentLabel.textColor = [UIColor colorWithRed:253.0/255.0 green:80.0/255.0 blue:2.0/255.0 alpha:1];
+    
+    [self selectTabAtIndex:currentIndex];
 }
 
 #pragma mark - UIScrollViewDelegate, Responding to Scrolling and Dragging
@@ -1075,6 +1094,11 @@
     if ([self.actualDelegate respondsToSelector:@selector(scrollViewDidEndScrollingAnimation:)]) {
         [self.actualDelegate scrollViewDidEndScrollingAnimation:scrollView];
     }
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+    return YES;
 }
 
 @end
