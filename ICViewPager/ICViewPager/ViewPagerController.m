@@ -94,7 +94,7 @@
     [bezierPath moveToPoint:CGPointMake(0.0, CGRectGetHeight(rect))];
     [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect))];
     [[UIColor colorWithRed:236.0/255.0 green:236.0/255.0 blue:236.0/255.0 alpha:1] setStroke];
-    [bezierPath setLineWidth:8.0];
+    [bezierPath setLineWidth:10.0];
     [bezierPath stroke];
     
     // Draw an indicator line if tab is selected
