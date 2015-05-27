@@ -844,7 +844,7 @@
         
         CGRect frame = tabView.frame;
         frame.origin.x = contentSizeWidth;
-        frame.size.width = self.view.frame.size.width/3;
+        frame.size.width = self.view.frame.size.width/self.tabCount;
         tabView.frame = frame;
         
         [self.tabsView addSubview:tabView];
