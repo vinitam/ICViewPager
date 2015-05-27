@@ -240,7 +240,7 @@
         NSUInteger previousIndex = self.activeTabIndex ? self.activeTabIndex : 0;
         TabView *prevtabView = [self.tabs objectAtIndex:previousIndex];
         UILabel *previousLabel = (UILabel *)[prevtabView viewWithTag:10];
-        previousLabel.textColor = [UIColor blackColor];
+        previousLabel.textColor = [UIColor lightGrayColor];
         
         
         TabView *currenttabView = [self.tabs objectAtIndex:index];
@@ -979,7 +979,7 @@
         NSUInteger previousIndex = [self indexForViewController:prevviewController];
         TabView *prevtabView = [self.tabs objectAtIndex:previousIndex];
         UILabel *previousLabel = (UILabel *)[prevtabView viewWithTag:10];
-        previousLabel.textColor = [UIColor blackColor];
+        previousLabel.textColor = [UIColor lightGrayColor];
     }
     
     // Select tab
