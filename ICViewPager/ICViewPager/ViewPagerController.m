@@ -210,7 +210,8 @@
         }
     }
     
-    CGRect frame = CGRectMake(self.tabsView.frame.origin.x, topLayoutGuide, self.tabsView.frame.size.width, self.tabsView.frame.size.height);
+    
+    CGRect frame = CGRectMake(self.tabsView.frame.origin.x, topLayoutGuide, self.view.frame.size.width, self.tabsView.frame.size.height);
     frame.origin.x = 0.0;
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = [self.tabHeight floatValue];
@@ -223,6 +224,7 @@
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = CGRectGetHeight(self.view.frame) - (topLayoutGuide + CGRectGetHeight(self.tabsView.frame)) - (self.tabBarController.tabBar.hidden ? 0 : CGRectGetHeight(self.tabBarController.tabBar.frame));
     self.contentView.frame = frame;
+    [self reloadData];
 }
 
 #pragma mark - IBAction
